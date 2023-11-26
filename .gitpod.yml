@@ -12,3 +12,4 @@ vscode:
     - "pantajoe.vscode-elixir-credo"
     - "stkb.rewrap"
     - "samuel-pordeus.elixir-test"
+    - "vortizhe.simple-ruby-erb"
