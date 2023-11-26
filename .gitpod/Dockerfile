@@ -2,13 +2,12 @@ FROM gitpod/workspace-elixir:latest
 
 ARG USERNAME=gitpod
 
-# Get the public key store for erlang
+# Get the public key store for and install erlang
 RUN sudo curl -s https://packages.erlang-solutions.com/debian/erlang_solutions.asc | sudo apt-key add -
-
 RUN sudo install-packages inotify-tools curl wget gnupg2 rubygems rename erlang erlang-dialyzer
 
 # Node required to compile assets (webpack)
-RUN sudo curl -sL https://deb.nodesource.com/setup_20.x  | sudo bash -
+RUN curl -sL https://deb.nodesource.com/nsolid_setup_deb.sh | sudo bash /dev/stdin 20
 RUN sudo install-packages nodejs
 
 ENV MIX_HOME=/home/gitpod/.mix
@@ -25,7 +24,7 @@ ENV PGWORKSPACE="/workspace/.pgsql"
 ENV PGDATA="$PGWORKSPACE/data"
 
 # Install PostgreSQL 14 (not in ubuntu packages for this version)
-RUN sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 RUN sudo install-packages postgresql-14 postgresql-contrib-14
 
@@ -43,6 +42,6 @@ ENV PATH="$HOME/.pg_ctl/bin:$PATH"
 ENV DATABASE_URL="postgresql://gitpod@localhost"
 ENV PGHOSTADDR="127.0.0.1"
 ENV PGDATABASE="postgres"
-COPY --chown=gitpod:gitpod postgresql-hook.bash $HOME/.bashrc.d/200-postgresql-launch
+COPY --chown=gitpod:gitpod .gitpod/postgresql-hook.bash $HOME/.bashrc.d/200-postgresql-launch
 
 USER gitpod
