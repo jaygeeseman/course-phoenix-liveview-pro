@@ -2,13 +2,12 @@ FROM gitpod/workspace-elixir:latest
 
 ARG USERNAME=gitpod
 
-# Get the public key store for erlang
+# Get the public key store for and install erlang
 RUN sudo curl -s https://packages.erlang-solutions.com/debian/erlang_solutions.asc | sudo apt-key add -
-
 RUN sudo install-packages inotify-tools curl wget gnupg2 rubygems rename erlang erlang-dialyzer
 
 # Node required to compile assets (webpack)
-RUN sudo curl -sL https://deb.nodesource.com/setup_20.x  | sudo bash -
+RUN curl -sL https://deb.nodesource.com/nsolid_setup_deb.sh | sudo bash /dev/stdin 20
 RUN sudo install-packages nodejs
 
 ENV MIX_HOME=/home/gitpod/.mix
