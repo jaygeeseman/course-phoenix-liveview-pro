@@ -3,7 +3,7 @@ image:
 
 vscode:
   extensions:
-    - "jakebecker.elixir-ls"
+    - "JakeBecker.elixir-ls"
     - "phoenixframework.phoenix"
     - "Equinusocio.vsc-material-theme"
     - "esbenp.prettier-vscode"
