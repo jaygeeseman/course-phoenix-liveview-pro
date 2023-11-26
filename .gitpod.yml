@@ -1,0 +1,14 @@
+image:
+  file: .gitpod.Dockerfile
+
+vscode:
+  extensions:
+    - "jakebecker.elixir-ls"
+    - "phoenixframework.phoenix"
+    - "Equinusocio.vsc-material-theme"
+    - "esbenp.prettier-vscode"
+    - "dbaeumer.vscode-eslint"
+    - "stylelint.vscode-stylelint"
+    - "pantajoe.vscode-elixir-credo"
+    - "stkb.rewrap"
+    - "samuel-pordeus.elixir-test"
