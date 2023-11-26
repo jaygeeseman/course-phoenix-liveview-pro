@@ -44,8 +44,4 @@ ENV PGHOSTADDR="127.0.0.1"
 ENV PGDATABASE="postgres"
 COPY --chown=gitpod:gitpod .gitpod/postgresql-hook.bash $HOME/.bashrc.d/200-postgresql-launch
 
-# Customize vscode settings
-RUN mkdir -p /workspace/.vscode-remote/data/Machine
-COPY --chown=gitpod:gitpod .gitpod/vscode-settings.json /workspace/.vscode-remote/data/Machine/settings.json
-
 USER gitpod
