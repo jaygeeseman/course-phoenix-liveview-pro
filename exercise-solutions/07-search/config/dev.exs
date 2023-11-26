@@ -2,8 +2,8 @@ import Config
 
 # Configure your database
 config :live_view_studio, LiveViewStudio.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "gitpod",
+  password: "gitpod",
   hostname: "localhost",
   database: "live_view_studio_2ed_dev",
   stacktrace: true,
