@@ -2,9 +2,17 @@ FROM gitpod/workspace-elixir:latest
 
 ARG USERNAME=gitpod
 
+# Update to latest erlang and elixir
+RUN asdf update
+RUN asdf install erlang latest
+RUN asdf install elixir latest
+RUN asdf global erlang latest
+RUN asdf global elixir latest
+
 # Get the public key store for and install erlang
 RUN sudo curl -s https://packages.erlang-solutions.com/debian/erlang_solutions.asc | sudo apt-key add -
-RUN sudo install-packages inotify-tools curl wget gnupg2 rubygems rename erlang erlang-dialyzer
+# RUN sudo install-packages inotify-tools curl wget gnupg2 rubygems rename erlang erlang-dialyzer
+RUN sudo install-packages inotify-tools curl wget gnupg2 rubygems rename erlang-dialyzer
 
 # Node required to compile assets (webpack)
 RUN curl -sL https://deb.nodesource.com/nsolid_setup_deb.sh | sudo bash /dev/stdin 20
