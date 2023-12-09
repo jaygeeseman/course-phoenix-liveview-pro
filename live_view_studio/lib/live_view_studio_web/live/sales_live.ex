@@ -5,7 +5,7 @@ defmodule LiveViewStudioWeb.SalesLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      # send message
+      # send message to trigger a refresh every second
       :timer.send_interval(1000, self(), :tick)
     end
 
