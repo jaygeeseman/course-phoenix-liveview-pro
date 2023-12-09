@@ -34,7 +34,7 @@ defmodule LiveViewStudioWeb.BingoLive do
   # Assigns the next random bingo number, removing it
   # from the assigned list of numbers. Resets the list
   # when the last number has been picked.
-  def pick(socket) do
+  defp pick(socket) do
     case socket.assigns.numbers do
       [head | []] ->
         assign(socket, number: head, numbers: all_numbers())
@@ -47,7 +47,7 @@ defmodule LiveViewStudioWeb.BingoLive do
   # Returns a list of all valid bingo numbers in random order.
   #
   # Example: ["B 4", "N 40", "O 73", "I 29", ...]
-  def all_numbers() do
+  defp all_numbers() do
     ~w(B I N G O)
     |> Enum.zip(Enum.chunk_every(1..75, 15))
     |> Enum.flat_map(fn {letter, numbers} ->
