@@ -17,7 +17,7 @@ defmodule LiveViewStudioWeb.BoatsLive do
     ~H"""
     <h1>Daily Boat Rentals</h1>
     <div id="boats">
-      <form>
+      <form phx-change="update-filter">
         <div class="filters">
           <select name="type">
             <%= Phoenix.HTML.Form.options_for_select(
@@ -60,6 +60,12 @@ defmodule LiveViewStudioWeb.BoatsLive do
       </div>
     </div>
     """
+  end
+
+  def handle_event("update-filter", %{"type" => type, "prices" => prices}, socket) do
+    filter = %{type: type, prices: prices}
+
+    {:noreply, assign(socket, filter: filter, boats: Boats.list_boats(filter))}
   end
 
   defp type_options do
