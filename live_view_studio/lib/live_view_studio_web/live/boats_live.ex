@@ -10,7 +10,8 @@ defmodule LiveViewStudioWeb.BoatsLive do
         boats: Boats.list_boats()
       )
 
-    {:ok, socket}
+    # Boats array not needed in state, so clear after each render
+    {:ok, socket, temporary_assigns: [boats: []]}
   end
 
   def render(assigns) do
