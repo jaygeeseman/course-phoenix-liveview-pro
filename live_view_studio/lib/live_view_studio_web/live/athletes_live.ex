@@ -17,7 +17,7 @@ defmodule LiveViewStudioWeb.AthletesLive do
     ~H"""
     <h1>Athletes</h1>
     <div id="athletes">
-      <form>
+      <form phx-change="update-filter">
         <div class="filters">
           <select name="sport">
             <%= Phoenix.HTML.Form.options_for_select(
@@ -53,6 +53,12 @@ defmodule LiveViewStudioWeb.AthletesLive do
       </div>
     </div>
     """
+  end
+
+  def handle_event("update-filter", %{"sport" => sport, "status" => status}, socket) do
+    filter = %{sport: sport, status: status}
+    socket = assign(socket, filter: filter, athletes: Athletes.list_athletes(filter))
+    {:noreply, socket}
   end
 
   defp sport_options do
