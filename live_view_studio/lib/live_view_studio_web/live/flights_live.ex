@@ -7,7 +7,8 @@ defmodule LiveViewStudioWeb.FlightsLive do
     socket =
       assign(socket,
         airport: "",
-        flights: []
+        flights: [],
+        loading: false
       )
 
     {:ok, socket}
@@ -25,12 +26,15 @@ defmodule LiveViewStudioWeb.FlightsLive do
           placeholder="Airport Code"
           autofocus
           autocomplete="off"
+          readonly={@loading}
         />
 
         <button>
           <img src="/images/search.svg" />
         </button>
       </form>
+
+      <div :if={@loading} class="loader">Loading...</div>
 
       <div class="flights">
         <ul>
@@ -59,10 +63,23 @@ defmodule LiveViewStudioWeb.FlightsLive do
   end
 
   def handle_event("search", %{"airport" => airport}, socket) do
+    send(self(), {:run_search, airport})
+
     socket =
       assign(socket,
         airport: airport,
-        flights: Flights.search_by_airport(airport)
+        flights: [],
+        loading: true
+      )
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:run_search, airport}, socket) do
+    socket =
+      assign(socket,
+        flights: Flights.search_by_airport(airport),
+        loading: false
       )
 
     {:noreply, socket}
