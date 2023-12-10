@@ -10,7 +10,7 @@ defmodule LiveViewStudioWeb.AthletesLive do
         athletes: Athletes.list_athletes()
       )
 
-    {:ok, socket}
+    {:ok, socket, temporary_assigns: [athletes: []]}
   end
 
   def render(assigns) do
