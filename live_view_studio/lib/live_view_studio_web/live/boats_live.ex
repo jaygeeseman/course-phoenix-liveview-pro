@@ -19,6 +19,9 @@ defmodule LiveViewStudioWeb.BoatsLive do
     <h1>Daily Boat Rentals</h1>
     <.promo>
       Save 25% on rentals!
+      <:legal>
+        Limit 1 per party
+      </:legal>
     </.promo>
     <div id="boats">
       <form phx-change="update-filter">
@@ -65,6 +68,9 @@ defmodule LiveViewStudioWeb.BoatsLive do
     </div>
     <.promo>
       Hurry, only 3 boats left!
+      <:legal>
+        Excluding weekends
+      </:legal>
     </.promo>
     """
   end
@@ -74,6 +80,9 @@ defmodule LiveViewStudioWeb.BoatsLive do
     <div class="promo">
       <div class="deal">
         <%= render_slot(@inner_block) %>
+      </div>
+      <div class="legal">
+        <%= render_slot(@legal) %>
       </div>
     </div>
     """
