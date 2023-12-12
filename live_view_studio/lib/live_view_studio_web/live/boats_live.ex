@@ -75,6 +75,10 @@ defmodule LiveViewStudioWeb.BoatsLive do
     """
   end
 
+  attr :expiration, :integer, required: true
+  slot :legal, required: true
+  slot :inner_block, required: true
+
   def promo(assigns) do
     ~H"""
     <div class="promo">
