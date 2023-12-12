@@ -18,11 +18,19 @@ defmodule LiveViewStudioWeb.ServersLive do
   def handle_params(%{"id" => id}, _url, socket) do
     server = Servers.get_server!(id)
 
-    {:noreply, assign(socket, selected_server: server)}
+    {:noreply,
+     assign(socket,
+       selected_server: server,
+       page_title: server.name
+     )}
   end
 
   def handle_params(_params, _uri, socket) do
-    {:noreply, assign(socket, selected_server: hd(socket.assigns.servers))}
+    {:noreply,
+     assign(socket,
+       selected_server: hd(socket.assigns.servers),
+       page_title: hd(socket.assigns.servers).name
+     )}
   end
 
   def render(assigns) do
@@ -31,6 +39,7 @@ defmodule LiveViewStudioWeb.ServersLive do
     <div id="servers">
       <div class="sidebar">
         <div class="nav">
+          <!-- .link patch meant for going to the same liveview -->
           <.link
             :for={server <- @servers}
             patch={~p"/servers?#{[id: server]}"}
@@ -74,7 +83,10 @@ defmodule LiveViewStudioWeb.ServersLive do
               </blockquote>
             </div>
           </div>
-          <div class="links"></div>
+          <div class="links">
+            <!-- .link navigate meant for going to a different liveview -->
+            <.link navigate={~p"/light"}>Adjust Lights</.link>
+          </div>
         </div>
       </div>
     </div>
