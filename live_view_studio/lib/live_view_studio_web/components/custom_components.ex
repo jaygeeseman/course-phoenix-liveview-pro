@@ -21,4 +21,12 @@ defmodule LiveViewStudioWeb.CustomComponents do
     </div>
     """
   end
+
+  attr :loading, :boolean, default: false
+
+  def loader(assigns) do
+    ~H"""
+    <div :if={@loading} class="loader">Loading...</div>
+    """
+  end
 end

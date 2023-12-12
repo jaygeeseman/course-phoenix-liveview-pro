@@ -3,6 +3,7 @@ defmodule LiveViewStudioWeb.FlightsLive do
 
   alias LiveViewStudio.Airports
   alias LiveViewStudio.Flights
+  import LiveViewStudioWeb.CustomComponents
 
   def mount(_params, _session, socket) do
     socket =
@@ -44,7 +45,7 @@ defmodule LiveViewStudioWeb.FlightsLive do
         </option>
       </datalist>
 
-      <div :if={@loading} class="loader">Loading...</div>
+      <.loader loading={@loading} />
 
       <div class="flights">
         <ul>
