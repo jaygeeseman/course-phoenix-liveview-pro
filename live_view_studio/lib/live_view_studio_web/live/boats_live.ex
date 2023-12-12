@@ -66,17 +66,14 @@ defmodule LiveViewStudioWeb.BoatsLive do
         </div>
       </div>
     </div>
-    <.promo expiration={1}>
+    <.promo>
       Hurry, only 3 boats left!
-      <:legal>
-        Excluding weekends
-      </:legal>
     </.promo>
     """
   end
 
-  attr :expiration, :integer, required: true
-  slot :legal, required: true
+  attr :expiration, :integer, default: 24
+  slot :legal
   slot :inner_block, required: true
 
   def promo(assigns) do
