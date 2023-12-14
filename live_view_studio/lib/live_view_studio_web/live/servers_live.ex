@@ -3,6 +3,10 @@ defmodule LiveViewStudioWeb.ServersLive do
 
   alias LiveViewStudio.Servers
 
+  # As a general rule of thumb, if you have state that can change based on
+  # URL parameters, then you should assign that state in handle_params.
+  # Otherwise, any other state can be assigned in mount which is invoked
+  # once per LiveView lifecycle.
   def mount(_params, _session, socket) do
     servers = Servers.list_servers()
 
@@ -39,7 +43,7 @@ defmodule LiveViewStudioWeb.ServersLive do
     <div id="servers">
       <div class="sidebar">
         <div class="nav">
-          <!-- .link patch meant for going to the same liveview -->
+          <!-- .link patch meant for going to the same liveview and process -->
           <.link
             :for={server <- @servers}
             patch={~p"/servers?#{[id: server]}"}
