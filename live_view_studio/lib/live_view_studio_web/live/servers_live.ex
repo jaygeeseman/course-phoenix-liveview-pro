@@ -46,7 +46,7 @@ defmodule LiveViewStudioWeb.ServersLive do
           <!-- .link patch meant for going to the same liveview and process -->
           <.link
             :for={server <- @servers}
-            patch={~p"/servers?#{[id: server]}"}
+            patch={~p"/servers/#{server}"}
             class={if server == @selected_server, do: "selected"}
           >
             <span class={server.status}></span>
