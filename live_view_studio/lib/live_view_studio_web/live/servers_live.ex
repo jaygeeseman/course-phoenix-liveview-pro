@@ -62,31 +62,7 @@ defmodule LiveViewStudioWeb.ServersLive do
       </div>
       <div class="main">
         <div class="wrapper">
-          <div class="server">
-            <div class="header">
-              <h2><%= @selected_server.name %></h2>
-              <span class={@selected_server.status}>
-                <%= @selected_server.status %>
-              </span>
-            </div>
-            <div class="body">
-              <div class="row">
-                <span>
-                  <%= @selected_server.deploy_count %> deploys
-                </span>
-                <span>
-                  <%= @selected_server.size %> MB
-                </span>
-                <span>
-                  <%= @selected_server.framework %>
-                </span>
-              </div>
-              <h3>Last Commit Message:</h3>
-              <blockquote>
-                <%= @selected_server.last_commit_message %>
-              </blockquote>
-            </div>
-          </div>
+          <.server server={@selected_server} />
           <div class="links">
             <!-- .link navigate meant for going to a different liveview -->
             <.link navigate={~p"/light"}>Adjust Lights</.link>
@@ -99,5 +75,37 @@ defmodule LiveViewStudioWeb.ServersLive do
 
   def handle_event("drink", _, socket) do
     {:noreply, update(socket, :coffees, &(&1 + 1))}
+  end
+
+  attr :server, :map, required: true
+
+  def server(assigns) do
+    ~H"""
+    <div class="server">
+      <div class="header">
+        <h2><%= @server.name %></h2>
+        <span class={@server.status}>
+          <%= @server.status %>
+        </span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <span>
+            <%= @server.deploy_count %> deploys
+          </span>
+          <span>
+            <%= @server.size %> MB
+          </span>
+          <span>
+            <%= @server.framework %>
+          </span>
+        </div>
+        <h3>Last Commit Message:</h3>
+        <blockquote>
+          <%= @server.last_commit_message %>
+        </blockquote>
+      </div>
+    </div>
+    """
   end
 end
