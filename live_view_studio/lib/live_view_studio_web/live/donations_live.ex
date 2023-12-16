@@ -14,12 +14,25 @@ defmodule LiveViewStudioWeb.DonationsLive do
     {:noreply,
      assign(socket,
        donations: Donations.list_donations(%{sort_by: sort_by, sort_order: sort_order}),
-       sort_by: sort_by,
-       sort_order: sort_order
+       options: %{sort_by: sort_by, sort_order: sort_order}
      )}
   end
 
-  def link_sort_order(current_sort_by, link_sort_by, current_sort_order) do
+  attr :sort_by, :atom, default: nil
+  attr :options, :map, required: true
+  slot :inner_block
+
+  def sort_link(assigns) do
+    ~H"""
+    <.link patch={
+      ~p"/donations?#{%{sort_by: @sort_by, sort_order: link_sort_order(@options.sort_by, @sort_by, @options.sort_order)}}"
+    }>
+      <%= render_slot(@inner_block) %>
+    </.link>
+    """
+  end
+
+  defp link_sort_order(current_sort_by, link_sort_by, current_sort_order) do
     cond do
       # Change the order when clicking current sort_by column
       current_sort_by == link_sort_by && current_sort_order == :asc -> :desc
