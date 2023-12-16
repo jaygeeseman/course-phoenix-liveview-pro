@@ -44,6 +44,14 @@
 
     <div class="footer">
       <div class="pagination">
+        <.link
+          :if={@options.page > 1}
+          patch={
+            ~p"/donations?#{%{@options | page: @options.page - 1}}"
+          }
+        >
+          Prev
+        </.link>
         <.link patch={
           ~p"/donations?#{%{@options | page: @options.page + 1}}"
         }>
