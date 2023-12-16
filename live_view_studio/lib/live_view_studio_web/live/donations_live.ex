@@ -26,17 +26,12 @@ defmodule LiveViewStudioWeb.DonationsLive do
      )}
   end
 
-  # Change the order when clicking current sort_by column
-  def link_sort_order(current_sort_by, link_sort_by, current_sort_order)
-      when current_sort_by == link_sort_by do
-    case current_sort_order do
-      :asc -> :desc
-      _ -> :asc
+  def link_sort_order(current_sort_by, link_sort_by, current_sort_order) do
+    cond do
+      # Change the order when clicking current sort_by column
+      current_sort_by == link_sort_by && current_sort_order == :asc -> :desc
+      # Default ascending
+      true -> :asc
     end
-  end
-
-  # Default ascending
-  def link_sort_order(_current_sort_by, _link_sort_by, _current_sort_order) do
-    :asc
   end
 end
