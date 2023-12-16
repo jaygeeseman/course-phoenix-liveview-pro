@@ -5,13 +5,25 @@
       <thead>
         <tr>
           <th class="item">
-            Item
+            <.link patch={
+              ~p"/donations?#{%{sort_by: :item, sort_order: link_sort_order(@sort_by, :item, @sort_order)}}"
+            }>
+              Item
+            </.link>
           </th>
           <th>
-            Quantity
+            <.link patch={
+              ~p"/donations?#{%{sort_by: :quantity, sort_order: link_sort_order(@sort_by, :quantity, @sort_order)}}"
+            }>
+              Quantity
+            </.link>
           </th>
           <th>
-            Days Until Expires
+            <.link patch={
+              ~p"/donations?#{%{sort_by: :days_until_expires, sort_order: link_sort_order(@sort_by, :days_until_expires, @sort_order)}}"
+            }>
+              Days Until Expires
+            </.link>
           </th>
         </tr>
       </thead>
