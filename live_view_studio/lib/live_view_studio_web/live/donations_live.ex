@@ -24,6 +24,13 @@ defmodule LiveViewStudioWeb.DonationsLive do
      )}
   end
 
+  def handle_event("select-per-page", %{"per-page" => per_page}, socket) do
+    # Update the URL and send through push_patch to call handle_params from the server side rather than a link
+    params = %{socket.assigns.options | per_page: (per_page || "5") |> String.to_integer()}
+    socket = push_patch(socket, to: ~p"/donations?#{params}")
+    {:noreply, socket}
+  end
+
   attr :sort_by, :atom, required: true
   attr :options, :map, required: true
   slot :inner_block, required: true
