@@ -11,8 +11,8 @@ defmodule LiveViewStudioWeb.DonationsLive do
     options = %{
       sort_by: valid_sort_by(params),
       sort_order: valid_sort_order(params),
-      page: (params["page"] || "1") |> String.to_integer(),
-      per_page: (params["per_page"] || "5") |> String.to_integer()
+      page: param_to_integer(params["page"], 1),
+      per_page: param_to_integer(params["per_page"], 5)
     }
 
     # IO.inspect(options, label: "HANDLE_PARAMS options")
@@ -26,7 +26,7 @@ defmodule LiveViewStudioWeb.DonationsLive do
 
   def handle_event("select-per-page", %{"per-page" => per_page}, socket) do
     # Update the URL and send through push_patch to call handle_params from the server side rather than a link
-    params = %{socket.assigns.options | per_page: (per_page || "5") |> String.to_integer()}
+    params = %{socket.assigns.options | per_page: param_to_integer(per_page, 5)}
     socket = push_patch(socket, to: ~p"/donations?#{params}")
     {:noreply, socket}
   end
@@ -85,4 +85,13 @@ defmodule LiveViewStudioWeb.DonationsLive do
   end
 
   defp valid_sort_order(_params), do: :asc
+
+  defp param_to_integer(nil, default), do: default
+
+  defp param_to_integer(param, default) do
+    case Integer.parse(param) do
+      {number, _} -> number
+      :error -> default
+    end
+  end
 end
