@@ -17,50 +17,6 @@ defmodule LiveViewStudioWeb.SandboxLive do
     {:ok, socket}
   end
 
-  def render(assigns) do
-    ~H"""
-    <h1>Build A Sandbox</h1>
-    <div id="sandbox">
-      <form phx-change="change_size" phx-submit="get_a_quote">
-        <div class="fields">
-          <div>
-            <label for="length">Length</label>
-            <div class="input">
-              <input type="number" name="length" value={@length} />
-              <span class="unit">feet</span>
-            </div>
-          </div>
-          <div>
-            <label for="width">Width</label>
-            <div class="input">
-              <input type="number" name="width" value={@width} />
-              <span class="unit">feet</span>
-            </div>
-          </div>
-          <div>
-            <label for="depth">Depth</label>
-            <div class="input">
-              <input type="number" name="depth" value={@depth} />
-              <span class="unit">inches</span>
-            </div>
-          </div>
-        </div>
-        <div class="weight">
-          You need <%= @weight %> pounds of sand 🏝
-        </div>
-        <button type="submit">
-          Get A Quote
-        </button>
-      </form>
-      <div :if={@price} class="quote">
-        Get your personal beach today for only <%= number_to_currency(
-          @price
-        ) %>
-      </div>
-    </div>
-    """
-  end
-
   def handle_event("change_size", params, socket) do
     %{"length" => l, "width" => w, "depth" => d} = params
 
