@@ -4,7 +4,11 @@ defmodule LiveViewStudioWeb.DonationsLive do
   alias LiveViewStudio.Donations
 
   def mount(_params, _session, socket) do
-    {:ok, socket, temporary_assigns: [donations: []]}
+    {
+      :ok,
+      assign(socket, donation_count: Donations.count_donations()),
+      temporary_assigns: [donations: []]
+    }
   end
 
   def handle_params(params, _, socket) do
