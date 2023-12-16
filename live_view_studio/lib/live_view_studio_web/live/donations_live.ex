@@ -8,13 +8,15 @@ defmodule LiveViewStudioWeb.DonationsLive do
   end
 
   def handle_params(params, _, socket) do
-    sort_by = valid_sort_by(params)
-    sort_order = valid_sort_order(params)
+    options = %{
+      sort_by: valid_sort_by(params),
+      sort_order: valid_sort_order(params)
+    }
 
     {:noreply,
      assign(socket,
-       donations: Donations.list_donations(%{sort_by: sort_by, sort_order: sort_order}),
-       options: %{sort_by: sort_by, sort_order: sort_order}
+       donations: Donations.list_donations(options),
+       options: options
      )}
   end
 
