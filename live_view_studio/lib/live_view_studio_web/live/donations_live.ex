@@ -10,8 +10,12 @@ defmodule LiveViewStudioWeb.DonationsLive do
   def handle_params(params, _, socket) do
     options = %{
       sort_by: valid_sort_by(params),
-      sort_order: valid_sort_order(params)
+      sort_order: valid_sort_order(params),
+      page: (params["page"] || "1") |> String.to_integer(),
+      per_page: (params["per_page"] || "5") |> String.to_integer()
     }
+
+    # IO.inspect(options, label: "HANDLE_PARAMS options")
 
     {:noreply,
      assign(socket,
@@ -25,10 +29,17 @@ defmodule LiveViewStudioWeb.DonationsLive do
   slot :inner_block, required: true
 
   def sort_link(assigns) do
+    params = %{
+      assigns.options
+      | sort_by: assigns.sort_by,
+        sort_order:
+          link_sort_order(assigns.options.sort_by, assigns.sort_by, assigns.options.sort_order)
+    }
+
+    assigns = assign(assigns, params: params)
+
     ~H"""
-    <.link patch={
-      ~p"/donations?#{%{sort_by: @sort_by, sort_order: link_sort_order(@options.sort_by, @sort_by, @options.sort_order)}}"
-    }>
+    <.link patch={~p"/donations?#{@params}"}>
       <%= render_slot(@inner_block) %>
       <%= sort_indicator(@options.sort_by, @sort_by, @options.sort_order) %>
     </.link>
