@@ -8,12 +8,6 @@ defmodule LiveViewStudioWeb.BoatsLive do
   import LiveViewStudioWeb.CustomComponents
 
   def mount(_params, _session, socket) do
-    socket =
-      assign(socket,
-        filter: %{type: "", prices: []},
-        boats: Boats.list_boats()
-      )
-
     # Boats array not needed in state, so clear after each render
     {:ok, socket, temporary_assigns: [boats: []]}
   end
@@ -93,10 +87,23 @@ defmodule LiveViewStudioWeb.BoatsLive do
     """
   end
 
+  def handle_params(params, _, socket) do
+    filter = %{type: params["type"] || "", prices: params["prices"] || []}
+
+    socket =
+      assign(socket,
+        filter: filter,
+        boats: Boats.list_boats(filter)
+      )
+
+    {:noreply, socket}
+  end
+
   def handle_event("update-filter", %{"type" => type, "prices" => prices}, socket) do
     filter = %{type: type, prices: prices}
+    socket = push_patch(socket, to: ~p"/boats?#{filter}")
 
-    {:noreply, assign(socket, filter: filter, boats: Boats.list_boats(filter))}
+    {:noreply, socket}
   end
 
   defp type_options do

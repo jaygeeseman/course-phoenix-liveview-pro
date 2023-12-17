@@ -9,6 +9,13 @@ defmodule LiveViewStudio.PizzaOrders do
   alias LiveViewStudio.PizzaOrders.PizzaOrder
 
   @doc """
+  Returns the total number of pizza_orders
+  """
+  def pizza_orders_count do
+    Repo.aggregate(PizzaOrder, :count, :id)
+  end
+
+  @doc """
   Returns the list of pizza_orders.
 
   ## Examples
