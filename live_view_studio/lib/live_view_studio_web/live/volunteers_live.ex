@@ -60,10 +60,12 @@ defmodule LiveViewStudioWeb.VolunteersLive do
         # changeset |> to_form ✨✨
         {:noreply, assign(socket, form: changeset |> to_form)}
 
-      {:ok, _volunteer} ->
+      {:ok, volunteer} ->
         {:noreply,
          assign(socket,
-           volunteers: Volunteers.list_volunteers(),
+           # volunteers: Volunteers.list_volunteers(),
+           # Do this to not hit the db again (but I worry about getting out of sync)
+           volunteers: [volunteer | socket.assigns.volunteers],
            form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
          )}
     end
