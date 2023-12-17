@@ -67,7 +67,8 @@ defmodule LiveViewStudioWeb.VolunteersLive do
            # Do this to not hit the db again (but I worry about getting out of sync)
            volunteers: [volunteer | socket.assigns.volunteers],
            form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
-         )}
+         )
+         |> put_flash(:info, "Thank you for checking in!")}
     end
   end
 end
