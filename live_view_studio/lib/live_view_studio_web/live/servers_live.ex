@@ -2,6 +2,7 @@ defmodule LiveViewStudioWeb.ServersLive do
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Servers
+  alias LiveViewStudio.Servers.Server
 
   # As a general rule of thumb, if you have state that can change based on
   # URL parameters, then you should assign that state in handle_params.
@@ -25,16 +26,27 @@ defmodule LiveViewStudioWeb.ServersLive do
     {:noreply,
      assign(socket,
        selected_server: server,
-       page_title: server.name
+       page_title: server.name,
+       new_server_form: nil
      )}
   end
 
   def handle_params(_params, _uri, socket) do
-    {:noreply,
-     assign(socket,
-       selected_server: hd(socket.assigns.servers),
-       page_title: hd(socket.assigns.servers).name
-     )}
+    if socket.assigns.live_action == :new do
+      {:noreply,
+       assign(socket,
+         selected_server: nil,
+         page_title: nil,
+         new_server_form: %Server{} |> Servers.change_server() |> to_form
+       )}
+    else
+      {:noreply,
+       assign(socket,
+         selected_server: hd(socket.assigns.servers),
+         page_title: hd(socket.assigns.servers).name,
+         new_server_form: nil
+       )}
+    end
   end
 
   def render(assigns) do
@@ -43,7 +55,10 @@ defmodule LiveViewStudioWeb.ServersLive do
     <div id="servers">
       <div class="sidebar">
         <div class="nav">
-          <!-- .link patch meant for going to the same liveview and process -->
+          <.link patch={~p"/servers/new"} class="add">
+            + Add New Server
+          </.link>
+          <!-- `.link patch` meant for going to the same liveview and process -->
           <.link
             :for={server <- @servers}
             patch={~p"/servers/#{server}"}
@@ -62,9 +77,13 @@ defmodule LiveViewStudioWeb.ServersLive do
       </div>
       <div class="main">
         <div class="wrapper">
-          <.server server={@selected_server} />
+          <%= if @live_action == :new do %>
+            <.new_server_form form={@new_server_form} />
+          <% else %>
+            <.server server={@selected_server} />
+          <% end %>
           <div class="links">
-            <!-- .link navigate meant for going to a different liveview -->
+            <!-- `.link navigate` meant for going to a different liveview -->
             <.link navigate={~p"/light"}>Adjust Lights</.link>
           </div>
         </div>
@@ -75,6 +94,31 @@ defmodule LiveViewStudioWeb.ServersLive do
 
   def handle_event("drink", _, socket) do
     {:noreply, update(socket, :coffees, &(&1 + 1))}
+  end
+
+  def handle_event("server-create", %{"server" => server_params}, socket) do
+    case Servers.create_server(server_params) do
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "server-create error")
+
+        {:noreply,
+         assign(socket,
+           new_server_form: changeset |> to_form
+         )}
+
+      {:ok, server} ->
+        {:noreply,
+         assign(socket,
+           servers: [server | socket.assigns.servers],
+           new_server_form: %Server{} |> Servers.change_server() |> to_form
+         )
+         # Display the server that was just added
+         |> push_patch(to: ~p"/servers/#{server}")}
+    end
+  end
+
+  def handle_event("cancel-server-create", _params, socket) do
+    {:noreply, socket |> push_patch(to: ~p"/servers")}
   end
 
   attr :server, :map, required: true
@@ -105,6 +149,33 @@ defmodule LiveViewStudioWeb.ServersLive do
           <%= @server.last_commit_message %>
         </blockquote>
       </div>
+    </div>
+    """
+  end
+
+  def new_server_form(assigns) do
+    ~H"""
+    <div class="server">
+      <.form for={@form} phx-submit="server-create">
+        <div class="field">
+          <label for="server_name">Server Name</label>
+          <.input field={@form[:name]} autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="server_framework">Framework</label>
+          <.input field={@form[:framework]} />
+        </div>
+        <div class="field">
+          <label for="server_size">Size in MB</label>
+          <.input field={@form[:size]} type="number" step="any" />
+        </div>
+        <.button phx-disable-with="Saving...">
+          Add Server
+        </.button>
+        <.link phx-click="cancel-server-create" class="cancel">
+          Cancel
+        </.link>
+      </.form>
     </div>
     """
   end
