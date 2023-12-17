@@ -2,6 +2,7 @@ defmodule LiveViewStudioWeb.ServersLive do
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Servers
+  alias LiveViewStudio.Servers.Server
 
   # As a general rule of thumb, if you have state that can change based on
   # URL parameters, then you should assign that state in handle_params.
@@ -13,6 +14,7 @@ defmodule LiveViewStudioWeb.ServersLive do
     socket =
       assign(socket,
         servers: servers,
+        new_server_form: %Server{} |> Servers.change_server() |> to_form,
         coffees: 0
       )
 
@@ -43,7 +45,7 @@ defmodule LiveViewStudioWeb.ServersLive do
     <div id="servers">
       <div class="sidebar">
         <div class="nav">
-          <!-- .link patch meant for going to the same liveview and process -->
+          <!-- `.link patch` meant for going to the same liveview and process -->
           <.link
             :for={server <- @servers}
             patch={~p"/servers/#{server}"}
@@ -62,9 +64,33 @@ defmodule LiveViewStudioWeb.ServersLive do
       </div>
       <div class="main">
         <div class="wrapper">
+          <div>
+            <.form for={@new_server_form} phx-submit="server-create">
+              <div class="field">
+                <label for="server_name">Server Name</label>
+                <.input field={@new_server_form[:name]} autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="server_framework">Framework</label>
+                <.input field={@new_server_form[:framework]} />
+              </div>
+              <div class="field">
+                <label for="server_size">Size in MB</label>
+                <.input
+                  field={@new_server_form[:size]}
+                  type="number"
+                  step="any"
+                />
+              </div>
+              <.button phx-disable-with="Saving...">
+                Add Server
+              </.button>
+            </.form>
+          </div>
+
           <.server server={@selected_server} />
           <div class="links">
-            <!-- .link navigate meant for going to a different liveview -->
+            <!-- `.link navigate` meant for going to a different liveview -->
             <.link navigate={~p"/light"}>Adjust Lights</.link>
           </div>
         </div>
@@ -75,6 +101,27 @@ defmodule LiveViewStudioWeb.ServersLive do
 
   def handle_event("drink", _, socket) do
     {:noreply, update(socket, :coffees, &(&1 + 1))}
+  end
+
+  def handle_event("server-create", %{"server" => server_params}, socket) do
+    case Servers.create_server(server_params) do
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "server-create error")
+
+        {:noreply,
+         assign(socket,
+           new_server_form: changeset |> to_form
+         )}
+
+      {:ok, server} ->
+        {:noreply,
+         assign(socket,
+           servers: [server | socket.assigns.servers],
+           new_server_form: %Server{} |> Servers.change_server() |> to_form
+         )
+         # Display the server that was just added
+         |> push_patch(to: ~p"/servers?#{server}")}
+    end
   end
 
   attr :server, :map, required: true
