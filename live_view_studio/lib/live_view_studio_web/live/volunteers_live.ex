@@ -6,7 +6,8 @@ defmodule LiveViewStudioWeb.VolunteersLive do
 
   def mount(_params, _session, socket) do
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        volunteers: Volunteers.list_volunteers(),
        # This magic makes forms easy ✨✨
        form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
@@ -68,11 +69,12 @@ defmodule LiveViewStudioWeb.VolunteersLive do
     case Volunteers.create_volunteer(volunteer_params) do
       {:error, changeset} ->
         # changeset |> to_form ✨✨
-        {:noreply, assign(socket, form: changeset |> to_form)}
+        {:noreply, socket |> assign(form: changeset |> to_form)}
 
       {:ok, volunteer} ->
         {:noreply,
-         assign(socket,
+         socket
+         |> assign(
            # volunteers: Volunteers.list_volunteers(),
            # Do this to not hit the db again (but I worry about getting out of sync)
            volunteers: [volunteer | socket.assigns.volunteers],
@@ -84,7 +86,8 @@ defmodule LiveViewStudioWeb.VolunteersLive do
 
   def handle_event("validate-check-in", %{"volunteer" => volunteer_params}, socket) do
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        form:
          %Volunteer{}
          |> Volunteers.change_volunteer(volunteer_params)
