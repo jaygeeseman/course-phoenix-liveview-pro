@@ -117,6 +117,17 @@ defmodule LiveViewStudioWeb.ServersLive do
     end
   end
 
+  def handle_event("validate-server-create", %{"server" => server_params}, socket) do
+    {:noreply,
+     assign(socket,
+       new_server_form:
+         %Server{}
+         |> Servers.change_server(server_params)
+         |> Map.put(:action, :validate)
+         |> to_form
+     )}
+  end
+
   def handle_event("cancel-server-create", _params, socket) do
     {:noreply, socket |> push_patch(to: ~p"/servers")}
   end
@@ -156,18 +167,31 @@ defmodule LiveViewStudioWeb.ServersLive do
   def new_server_form(assigns) do
     ~H"""
     <div class="server">
-      <.form for={@form} phx-submit="server-create">
+      <.form
+        for={@form}
+        phx-submit="server-create"
+        phx-change="validate-server-create"
+      >
         <div class="field">
           <label for="server_name">Server Name</label>
-          <.input field={@form[:name]} autocomplete="off" />
+          <.input
+            field={@form[:name]}
+            autocomplete="off"
+            phx-debounce="1500"
+          />
         </div>
         <div class="field">
           <label for="server_framework">Framework</label>
-          <.input field={@form[:framework]} />
+          <.input field={@form[:framework]} phx-debounce="1500" />
         </div>
         <div class="field">
           <label for="server_size">Size in MB</label>
-          <.input field={@form[:size]} type="number" step="any" />
+          <.input
+            field={@form[:size]}
+            type="number"
+            step="any"
+            phx-debounce="blur"
+          />
         </div>
         <.button phx-disable-with="Saving...">
           Add Server
