@@ -132,6 +132,17 @@ defmodule LiveViewStudioWeb.ServersLive do
     {:noreply, socket |> push_patch(to: ~p"/servers")}
   end
 
+  def handle_event("toggle-server-status", %{"id" => id}, socket) do
+    server = Servers.get_server!(id)
+    {:ok, _} = Servers.toggle_status_server(server)
+
+    {:noreply,
+     socket
+     # TODO: Don't want to retrieve every time?
+     |> assign(servers: Servers.list_servers())
+     |> push_patch(to: ~p"/servers/#{server}")}
+  end
+
   attr :server, :map, required: true
 
   def server(assigns) do
@@ -139,9 +150,13 @@ defmodule LiveViewStudioWeb.ServersLive do
     <div class="server">
       <div class="header">
         <h2><%= @server.name %></h2>
-        <span class={@server.status}>
+        <button
+          class={@server.status}
+          phx-click="toggle-server-status"
+          phx-value-id={@server.id}
+        >
           <%= @server.status %>
-        </span>
+        </button>
       </div>
       <div class="body">
         <div class="row">
