@@ -6,8 +6,12 @@ defmodule LiveViewStudioWeb.VolunteersLive do
 
   def mount(_params, _session, socket) do
     {:ok,
-     assign(socket,
-       volunteers: Volunteers.list_volunteers(),
+     socket
+     # Streams allow managing large collections on the browser without keeping
+     # the data in state on the server. See this commit for the requirements
+     # versus assigns.
+     |> stream(:volunteers, Volunteers.list_volunteers())
+     |> assign(
        # This magic makes forms easy ✨✨
        form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
      )}
@@ -41,23 +45,28 @@ defmodule LiveViewStudioWeb.VolunteersLive do
       </.form>
 
       <pre>
-        <%= inspect(@form, pretty: true) %>
+        <%#= inspect(@form, pretty: true) %>
       </pre>
 
-      <div
-        :for={volunteer <- @volunteers}
-        class={"volunteer #{if volunteer.checked_out, do: "out"}"}
-      >
-        <div class="name">
-          <%= volunteer.name %>
-        </div>
-        <div class="phone">
-          <%= volunteer.phone %>
-        </div>
-        <div class="status">
-          <button>
-            <%= if volunteer.checked_out, do: "Check In", else: "Check Out" %>
-          </button>
+      <div id="volunteers" phx-update="stream">
+        <div
+          :for={{volunteer_id, volunteer} <- @streams.volunteers}
+          class={"volunteer #{if volunteer.checked_out, do: "out"}"}
+          id={volunteer_id}
+        >
+          <div class="name">
+            <%= volunteer.name %>
+          </div>
+          <div class="phone">
+            <%= volunteer.phone %>
+          </div>
+          <div class="status">
+            <button>
+              <%= if volunteer.checked_out,
+                do: "Check In",
+                else: "Check Out" %>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -68,23 +77,21 @@ defmodule LiveViewStudioWeb.VolunteersLive do
     case Volunteers.create_volunteer(volunteer_params) do
       {:error, changeset} ->
         # changeset |> to_form ✨✨
-        {:noreply, assign(socket, form: changeset |> to_form)}
+        {:noreply, socket |> assign(form: changeset |> to_form)}
 
       {:ok, volunteer} ->
         {:noreply,
-         assign(socket,
-           # volunteers: Volunteers.list_volunteers(),
-           # Do this to not hit the db again (but I worry about getting out of sync)
-           volunteers: [volunteer | socket.assigns.volunteers],
-           form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
-         )
+         socket
+         |> stream_insert(:volunteers, volunteer, at: 0)
+         |> assign(form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form)
          |> put_flash(:info, "Thank you for checking in!")}
     end
   end
 
   def handle_event("validate-check-in", %{"volunteer" => volunteer_params}, socket) do
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        form:
          %Volunteer{}
          |> Volunteers.change_volunteer(volunteer_params)
