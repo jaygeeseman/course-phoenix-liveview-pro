@@ -138,7 +138,7 @@ defmodule LiveViewStudioWeb.ServersLive do
 
     {:noreply,
      socket
-     # TODO: Don't want to retrieve every time?
+     # TODO: Don't want to retrieve every time? Could change servers to stream
      |> assign(servers: Servers.list_servers())
      |> push_patch(to: ~p"/servers/#{server}")}
   end
