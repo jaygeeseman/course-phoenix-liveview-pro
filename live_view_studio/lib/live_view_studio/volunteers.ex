@@ -19,8 +19,16 @@ defmodule LiveViewStudio.Volunteers do
   Sends a volunteers change notification
   """
   def broadcast({:ok, volunteer}, tag) do
-    Phoenix.PubSub.broadcast(LiveViewStudio.PubSub, "volunteers", {tag, volunteer})
+    Phoenix.PubSub.broadcast(
+      LiveViewStudio.PubSub,
+      "volunteers",
+      {tag, volunteer}
+    )
+
+    {:ok, volunteer}
   end
+
+  def broadcast({:error, _changeset} = error, _tag), do: error
 
   @doc """
   Returns the list of volunteers.
