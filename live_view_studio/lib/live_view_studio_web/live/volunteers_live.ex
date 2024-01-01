@@ -3,6 +3,7 @@ defmodule LiveViewStudioWeb.VolunteersLive do
 
   alias LiveViewStudio.Volunteers
   alias LiveViewStudio.Volunteers.Volunteer
+  alias LiveViewStudioWeb.VolunteerFormComponent
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -10,18 +11,14 @@ defmodule LiveViewStudioWeb.VolunteersLive do
      # Streams allow managing large collections on the browser without keeping
      # the data in state on the server. See this commit for the requirements
      # versus assigns.
-     |> stream(:volunteers, Volunteers.list_volunteers())
-     |> assign(
-       # This magic makes forms easy ✨✨
-       form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form
-     )}
+     |> stream(:volunteers, Volunteers.list_volunteers())}
   end
 
   def render(assigns) do
     ~H"""
     <h1>Volunteer Check-In</h1>
     <div id="volunteer-checkin">
-      <.checkin_form form={@form} />
+      <.live_component module={VolunteerFormComponent} id={:new} />
 
       <pre>
         <%#= inspect(@form, pretty: true) %>
@@ -35,29 +32,6 @@ defmodule LiveViewStudioWeb.VolunteersLive do
         />
       </div>
     </div>
-    """
-  end
-
-  def checkin_form(assigns) do
-    ~H"""
-    <.form for={@form} phx-submit="check-in" phx-change="validate-check-in">
-      <.input
-        field={@form[:name]}
-        placeholder="Name"
-        autocomplete="off"
-        phx-debounce="2000"
-      />
-      <.input
-        field={@form[:phone]}
-        type="tel"
-        placeholder="Phone"
-        autocomplete="off"
-        phx-debounce="blur"
-      />
-      <.button phx-disable-with="Saving...">
-        Check In
-      </.button>
-    </.form>
     """
   end
 
@@ -92,33 +66,6 @@ defmodule LiveViewStudioWeb.VolunteersLive do
     """
   end
 
-  def handle_event("check-in", %{"volunteer" => volunteer_params}, socket) do
-    case Volunteers.create_volunteer(volunteer_params) do
-      {:error, changeset} ->
-        # changeset |> to_form ✨✨
-        {:noreply, socket |> assign(form: changeset |> to_form)}
-
-      {:ok, volunteer} ->
-        {:noreply,
-         socket
-         |> stream_insert(:volunteers, volunteer, at: 0)
-         |> assign(form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form)
-         |> put_flash(:info, "Thank you for checking in!")}
-    end
-  end
-
-  def handle_event("validate-check-in", %{"volunteer" => volunteer_params}, socket) do
-    {:noreply,
-     socket
-     |> assign(
-       form:
-         %Volunteer{}
-         |> Volunteers.change_volunteer(volunteer_params)
-         |> Map.put(:action, :validate)
-         |> to_form
-     )}
-  end
-
   def handle_event("toggle-checked-out", %{"id" => id}, socket) do
     volunteer = Volunteers.get_volunteer!(id)
 
@@ -139,5 +86,11 @@ defmodule LiveViewStudioWeb.VolunteersLive do
     {:noreply,
      socket
      |> stream_delete(:volunteers, volunteer)}
+  end
+
+  def handle_info({:volunteer_created, volunteer}, socket) do
+    {:noreply,
+     socket
+     |> stream_insert(:volunteers, volunteer, at: 0)}
   end
 end
