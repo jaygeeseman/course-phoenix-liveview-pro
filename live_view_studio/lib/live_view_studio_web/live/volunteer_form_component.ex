@@ -13,10 +13,25 @@ defmodule LiveViewStudioWeb.VolunteerFormComponent do
      )}
   end
 
+  # update is called in the lifecycle between mount and render,
+  # and it receives assigns from the caller and allows us to perform
+  # any needed manipulations before getting to render.
+  # If not defined, default behavior is to merge assigns into
+  # socket.assigns
+  def update(assigns, socket) do
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:count, assigns.count + 1)}
+  end
+
   def render(assigns) do
     # Live components need a single static html tag at the root
     ~H"""
     <div>
+      <div class="count">
+        Go for it! You'll be volunteer #<%= @count %>
+      </div>
       <.form
         for={@form}
         phx-submit="check-in"

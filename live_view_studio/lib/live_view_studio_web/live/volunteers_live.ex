@@ -6,19 +6,26 @@ defmodule LiveViewStudioWeb.VolunteersLive do
   alias LiveViewStudioWeb.VolunteerFormComponent
 
   def mount(_params, _session, socket) do
+    volunteers = Volunteers.list_volunteers()
+
     {:ok,
      socket
      # Streams allow managing large collections on the browser without keeping
      # the data in state on the server. See this commit for the requirements
      # versus assigns.
-     |> stream(:volunteers, Volunteers.list_volunteers())}
+     |> stream(:volunteers, volunteers)
+     |> assign(:count, length(volunteers))}
   end
 
   def render(assigns) do
     ~H"""
     <h1>Volunteer Check-In</h1>
     <div id="volunteer-checkin">
-      <.live_component module={VolunteerFormComponent} id={:new} />
+      <.live_component
+        module={VolunteerFormComponent}
+        id={:new}
+        count={@count}
+      />
 
       <pre>
         <%#= inspect(@form, pretty: true) %>
@@ -85,12 +92,14 @@ defmodule LiveViewStudioWeb.VolunteersLive do
 
     {:noreply,
      socket
+     |> update(:count, &(&1 - 1))
      |> stream_delete(:volunteers, volunteer)}
   end
 
   def handle_info({:volunteer_created, volunteer}, socket) do
     {:noreply,
      socket
+     |> update(:count, &(&1 + 1))
      |> stream_insert(:volunteers, volunteer, at: 0)}
   end
 end
