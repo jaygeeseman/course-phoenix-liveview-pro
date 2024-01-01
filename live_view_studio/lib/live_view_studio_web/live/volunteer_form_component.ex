@@ -65,10 +65,7 @@ defmodule LiveViewStudioWeb.VolunteerFormComponent do
         # changeset |> to_form ✨✨
         {:noreply, socket |> assign(form: changeset |> to_form)}
 
-      {:ok, volunteer} ->
-        # Notify parent liveview that the volunteer was created
-        send(self(), {__MODULE__, :volunteer_created, volunteer})
-
+      {:ok, _volunteer} ->
         {:noreply,
          socket
          |> assign(form: %Volunteer{} |> Volunteers.change_volunteer() |> to_form)
