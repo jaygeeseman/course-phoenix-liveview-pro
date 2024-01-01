@@ -67,7 +67,7 @@ defmodule LiveViewStudioWeb.VolunteerFormComponent do
 
       {:ok, volunteer} ->
         # Notify parent liveview that the volunteer was created
-        send(self(), {:volunteer_created, volunteer})
+        send(self(), {__MODULE__, :volunteer_created, volunteer})
 
         {:noreply,
          socket

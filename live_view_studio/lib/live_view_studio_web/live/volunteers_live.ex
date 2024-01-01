@@ -96,7 +96,7 @@ defmodule LiveViewStudioWeb.VolunteersLive do
      |> stream_delete(:volunteers, volunteer)}
   end
 
-  def handle_info({:volunteer_created, volunteer}, socket) do
+  def handle_info({VolunteerFormComponent, :volunteer_created, volunteer}, socket) do
     {:noreply,
      socket
      |> update(:count, &(&1 + 1))
