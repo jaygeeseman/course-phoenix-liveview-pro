@@ -18,8 +18,8 @@ defmodule LiveViewStudio.Volunteers do
   @doc """
   Sends a volunteers change notification
   """
-  def broadcast(message) do
-    Phoenix.PubSub.broadcast(LiveViewStudio.PubSub, "volunteers", message)
+  def broadcast({:ok, volunteer}, tag) do
+    Phoenix.PubSub.broadcast(LiveViewStudio.PubSub, "volunteers", {tag, volunteer})
   end
 
   @doc """
@@ -64,16 +64,12 @@ defmodule LiveViewStudio.Volunteers do
 
   """
   def create_volunteer(attrs \\ %{}) do
-    {:ok, volunteer} =
-      %Volunteer{}
-      |> Volunteer.changeset(attrs)
-      |> Repo.insert()
-
+    %Volunteer{}
+    |> Volunteer.changeset(attrs)
+    |> Repo.insert()
     # PubSub allows us to let other subscribers as well as the current
     # liveview know about events, so it can replace send(self(), xxx)
-    broadcast({:volunteer_created, volunteer})
-
-    {:ok, volunteer}
+    |> broadcast(:volunteer_created)
   end
 
   @doc """
@@ -89,14 +85,10 @@ defmodule LiveViewStudio.Volunteers do
 
   """
   def update_volunteer(%Volunteer{} = volunteer, attrs) do
-    {:ok, volunteer} =
-      volunteer
-      |> Volunteer.changeset(attrs)
-      |> Repo.update()
-
-    broadcast({:volunteer_updated, volunteer})
-
-    {:ok, volunteer}
+    volunteer
+    |> Volunteer.changeset(attrs)
+    |> Repo.update()
+    |> broadcast(:volunteer_updated)
   end
 
   @doc """
@@ -112,11 +104,9 @@ defmodule LiveViewStudio.Volunteers do
 
   """
   def delete_volunteer(%Volunteer{} = volunteer) do
-    {:ok, volunteer} = Repo.delete(volunteer)
-
-    broadcast({:volunteer_deleted, volunteer})
-
-    {:ok, volunteer}
+    volunteer
+    |> Repo.delete()
+    |> broadcast(:volunteer_deleted)
   end
 
   @doc """
