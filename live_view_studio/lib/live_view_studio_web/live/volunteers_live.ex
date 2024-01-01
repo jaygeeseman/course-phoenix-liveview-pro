@@ -21,65 +21,73 @@ defmodule LiveViewStudioWeb.VolunteersLive do
     ~H"""
     <h1>Volunteer Check-In</h1>
     <div id="volunteer-checkin">
-      <.form
-        for={@form}
-        phx-submit="check-in"
-        phx-change="validate-check-in"
-      >
-        <.input
-          field={@form[:name]}
-          placeholder="Name"
-          autocomplete="off"
-          phx-debounce="2000"
-        />
-        <.input
-          field={@form[:phone]}
-          type="tel"
-          placeholder="Phone"
-          autocomplete="off"
-          phx-debounce="blur"
-        />
-        <.button phx-disable-with="Saving...">
-          Check In
-        </.button>
-      </.form>
+      <.checkin_form form={@form} />
 
       <pre>
         <%#= inspect(@form, pretty: true) %>
       </pre>
 
       <div id="volunteers" phx-update="stream">
-        <div
+        <.volunteer
           :for={{volunteer_id, volunteer} <- @streams.volunteers}
-          class={"volunteer #{if volunteer.checked_out, do: "out"}"}
+          volunteer={volunteer}
           id={volunteer_id}
-        >
-          <div class="name">
-            <%= volunteer.name %>
-          </div>
-          <div class="phone">
-            <%= volunteer.phone %>
-          </div>
-          <div class="status">
-            <button
-              phx-click="toggle-checked-out"
-              phx-value-id={volunteer.id}
-            >
-              <%= if volunteer.checked_out,
-                do: "Check In",
-                else: "Check Out" %>
-            </button>
-          </div>
-          <.link
-            class="delete"
-            phx-click="delete"
-            phx-value-id={volunteer.id}
-            data-confirm="Are you sure?"
-          >
-            <.icon name="hero-trash-solid" />
-          </.link>
-        </div>
+        />
       </div>
+    </div>
+    """
+  end
+
+  def checkin_form(assigns) do
+    ~H"""
+    <.form for={@form} phx-submit="check-in" phx-change="validate-check-in">
+      <.input
+        field={@form[:name]}
+        placeholder="Name"
+        autocomplete="off"
+        phx-debounce="2000"
+      />
+      <.input
+        field={@form[:phone]}
+        type="tel"
+        placeholder="Phone"
+        autocomplete="off"
+        phx-debounce="blur"
+      />
+      <.button phx-disable-with="Saving...">
+        Check In
+      </.button>
+    </.form>
+    """
+  end
+
+  def volunteer(assigns) do
+    ~H"""
+    <div
+      class={"volunteer #{if @volunteer.checked_out, do: "out"}"}
+      id={@id}
+    >
+      <div class="name">
+        <%= @volunteer.name %>
+      </div>
+      <div class="phone">
+        <%= @volunteer.phone %>
+      </div>
+      <div class="status">
+        <button phx-click="toggle-checked-out" phx-value-id={@volunteer.id}>
+          <%= if @volunteer.checked_out,
+            do: "Check In",
+            else: "Check Out" %>
+        </button>
+      </div>
+      <.link
+        class="delete"
+        phx-click="delete"
+        phx-value-id={@volunteer.id}
+        data-confirm="Are you sure?"
+      >
+        <.icon name="hero-trash-solid" />
+      </.link>
     </div>
     """
   end
