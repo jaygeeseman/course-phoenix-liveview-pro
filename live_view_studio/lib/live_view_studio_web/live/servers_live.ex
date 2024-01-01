@@ -1,4 +1,5 @@
 defmodule LiveViewStudioWeb.ServersLive do
+  alias LiveViewStudioWeb.NewServerFormComponent
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Servers
@@ -9,42 +10,39 @@ defmodule LiveViewStudioWeb.ServersLive do
   # Otherwise, any other state can be assigned in mount which is invoked
   # once per LiveView lifecycle.
   def mount(_params, _session, socket) do
-    servers = Servers.list_servers()
-
-    socket =
-      assign(socket,
-        servers: servers,
-        coffees: 0
-      )
-
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign(
+       servers: Servers.list_servers(),
+       coffees: 0
+     )}
   end
 
   def handle_params(%{"id" => id}, _url, socket) do
     server = Servers.get_server!(id)
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        selected_server: server,
-       page_title: server.name,
-       new_server_form: nil
+       page_title: server.name
      )}
   end
 
   def handle_params(_params, _uri, socket) do
     if socket.assigns.live_action == :new do
       {:noreply,
-       assign(socket,
+       socket
+       |> assign(
          selected_server: nil,
-         page_title: nil,
-         new_server_form: %Server{} |> Servers.change_server() |> to_form
+         page_title: nil
        )}
     else
       {:noreply,
-       assign(socket,
+       socket
+       |> assign(
          selected_server: hd(socket.assigns.servers),
-         page_title: hd(socket.assigns.servers).name,
-         new_server_form: nil
+         page_title: hd(socket.assigns.servers).name
        )}
     end
   end
@@ -78,7 +76,7 @@ defmodule LiveViewStudioWeb.ServersLive do
       <div class="main">
         <div class="wrapper">
           <%= if @live_action == :new do %>
-            <.new_server_form form={@new_server_form} />
+            <.live_component module={NewServerFormComponent} id={:new} />
           <% else %>
             <.server server={@selected_server} />
           <% end %>
@@ -93,39 +91,7 @@ defmodule LiveViewStudioWeb.ServersLive do
   end
 
   def handle_event("drink", _, socket) do
-    {:noreply, update(socket, :coffees, &(&1 + 1))}
-  end
-
-  def handle_event("server-create", %{"server" => server_params}, socket) do
-    case Servers.create_server(server_params) do
-      {:error, changeset} ->
-        IO.inspect(changeset, label: "server-create error")
-
-        {:noreply,
-         assign(socket,
-           new_server_form: changeset |> to_form
-         )}
-
-      {:ok, server} ->
-        {:noreply,
-         assign(socket,
-           servers: [server | socket.assigns.servers],
-           new_server_form: %Server{} |> Servers.change_server() |> to_form
-         )
-         # Display the server that was just added
-         |> push_patch(to: ~p"/servers/#{server}")}
-    end
-  end
-
-  def handle_event("validate-server-create", %{"server" => server_params}, socket) do
-    {:noreply,
-     assign(socket,
-       new_server_form:
-         %Server{}
-         |> Servers.change_server(server_params)
-         |> Map.put(:action, :validate)
-         |> to_form
-     )}
+    {:noreply, socket |> update(:coffees, &(&1 + 1))}
   end
 
   def handle_event("cancel-server-create", _params, socket) do
@@ -140,6 +106,14 @@ defmodule LiveViewStudioWeb.ServersLive do
      socket
      # TODO: Don't want to retrieve every time? Could change servers to stream
      |> assign(servers: Servers.list_servers())
+     |> push_patch(to: ~p"/servers/#{server}")}
+  end
+
+  def handle_info({NewServerFormComponent, :new_server, server}, socket) do
+    {:noreply,
+     socket
+     |> assign(servers: [server | socket.assigns.servers])
+     # Display the server that was just added
      |> push_patch(to: ~p"/servers/#{server}")}
   end
 
@@ -175,46 +149,6 @@ defmodule LiveViewStudioWeb.ServersLive do
           <%= @server.last_commit_message %>
         </blockquote>
       </div>
-    </div>
-    """
-  end
-
-  def new_server_form(assigns) do
-    ~H"""
-    <div class="server">
-      <.form
-        for={@form}
-        phx-submit="server-create"
-        phx-change="validate-server-create"
-      >
-        <div class="field">
-          <label for="server_name">Server Name</label>
-          <.input
-            field={@form[:name]}
-            autocomplete="off"
-            phx-debounce="1500"
-          />
-        </div>
-        <div class="field">
-          <label for="server_framework">Framework</label>
-          <.input field={@form[:framework]} phx-debounce="1500" />
-        </div>
-        <div class="field">
-          <label for="server_size">Size in MB</label>
-          <.input
-            field={@form[:size]}
-            type="number"
-            step="any"
-            phx-debounce="blur"
-          />
-        </div>
-        <.button phx-disable-with="Saving...">
-          Add Server
-        </.button>
-        <.link phx-click="cancel-server-create" class="cancel">
-          Cancel
-        </.link>
-      </.form>
     </div>
     """
   end
