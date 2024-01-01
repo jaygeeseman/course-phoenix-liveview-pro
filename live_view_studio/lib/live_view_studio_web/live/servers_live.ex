@@ -3,13 +3,14 @@ defmodule LiveViewStudioWeb.ServersLive do
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Servers
-  alias LiveViewStudio.Servers.Server
 
   # As a general rule of thumb, if you have state that can change based on
   # URL parameters, then you should assign that state in handle_params.
   # Otherwise, any other state can be assigned in mount which is invoked
   # once per LiveView lifecycle.
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Servers.subscribe()
+
     {:ok,
      socket
      |> assign(
@@ -102,19 +103,43 @@ defmodule LiveViewStudioWeb.ServersLive do
     server = Servers.get_server!(id)
     {:ok, _} = Servers.toggle_status_server(server)
 
-    {:noreply,
-     socket
-     # TODO: Don't want to retrieve every time? Could change servers to stream
-     |> assign(servers: Servers.list_servers())
-     |> push_patch(to: ~p"/servers/#{server}")}
+    {
+      :noreply,
+      socket
+      # Display the updated server
+      |> push_patch(to: ~p"/servers/#{server}")
+    }
   end
 
   def handle_info({NewServerFormComponent, :new_server, server}, socket) do
+    # Handles the local server created event. Displays the server that was just created
     {:noreply,
      socket
-     |> assign(servers: [server | socket.assigns.servers])
      # Display the server that was just added
      |> push_patch(to: ~p"/servers/#{server}")}
+  end
+
+  def handle_info({:server_created, server}, socket) do
+    # Handles the universal server created event. Updates the server list.
+    {:noreply,
+     socket
+     |> update(:servers, fn servers -> [server | servers] end)}
+  end
+
+  def handle_info({:server_updated, server}, socket) do
+    socket =
+      if socket.assigns.selected_server && server.id == socket.assigns.selected_server.id do
+        push_patch(socket, to: ~p"/servers/#{server}")
+      else
+        socket
+      end
+
+    {
+      :noreply,
+      socket
+      # TODO: Don't want to retrieve every time? Could change servers to stream
+      |> assign(servers: Servers.list_servers())
+    }
   end
 
   attr :server, :map, required: true
