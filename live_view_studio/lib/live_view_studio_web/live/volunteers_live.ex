@@ -2,10 +2,14 @@ defmodule LiveViewStudioWeb.VolunteersLive do
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Volunteers
-  alias LiveViewStudio.Volunteers.Volunteer
+  # alias LiveViewStudio.Volunteers.Volunteer
   alias LiveViewStudioWeb.VolunteerFormComponent
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Volunteers.subscribe()
+    end
+
     volunteers = Volunteers.list_volunteers()
 
     {:ok,
@@ -76,30 +80,36 @@ defmodule LiveViewStudioWeb.VolunteersLive do
   def handle_event("toggle-checked-out", %{"id" => id}, socket) do
     volunteer = Volunteers.get_volunteer!(id)
 
-    {:ok, volunteer} =
+    {:ok, _volunteer} =
       Volunteers.update_volunteer(volunteer, %{checked_out: !volunteer.checked_out})
 
-    # Update UI - stream_insert also updates, like an upsert
-    {:noreply,
-     socket
-     |> stream_insert(:volunteers, volunteer)}
+    {:noreply, socket}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
-    volunteer = Volunteers.get_volunteer!(id)
+    {:ok, _} = Volunteers.get_volunteer!(id) |> Volunteers.delete_volunteer()
 
-    {:ok, _} = Volunteers.delete_volunteer(volunteer)
-
-    {:noreply,
-     socket
-     |> update(:count, &(&1 - 1))
-     |> stream_delete(:volunteers, volunteer)}
+    {:noreply, socket}
   end
 
-  def handle_info({VolunteerFormComponent, :volunteer_created, volunteer}, socket) do
+  def handle_info({:volunteer_created, volunteer}, socket) do
     {:noreply,
      socket
      |> update(:count, &(&1 + 1))
      |> stream_insert(:volunteers, volunteer, at: 0)}
+  end
+
+  def handle_info({:volunteer_updated, volunteer}, socket) do
+    {:noreply,
+     socket
+     # stream_insert also updates, like an upsert
+     |> stream_insert(:volunteers, volunteer)}
+  end
+
+  def handle_info({:volunteer_deleted, volunteer}, socket) do
+    {:noreply,
+     socket
+     |> update(:count, &(&1 - 1))
+     |> stream_delete(:volunteers, volunteer)}
   end
 end

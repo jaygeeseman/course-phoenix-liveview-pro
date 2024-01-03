@@ -9,6 +9,28 @@ defmodule LiveViewStudio.Volunteers do
   alias LiveViewStudio.Volunteers.Volunteer
 
   @doc """
+  Subscribes to changes to volunteers
+  """
+  def subscribe do
+    Phoenix.PubSub.subscribe(LiveViewStudio.PubSub, "volunteers")
+  end
+
+  @doc """
+  Sends a volunteers change notification
+  """
+  def broadcast({:ok, volunteer}, tag) do
+    Phoenix.PubSub.broadcast(
+      LiveViewStudio.PubSub,
+      "volunteers",
+      {tag, volunteer}
+    )
+
+    {:ok, volunteer}
+  end
+
+  def broadcast({:error, _changeset} = error, _tag), do: error
+
+  @doc """
   Returns the list of volunteers.
 
   ## Examples
@@ -53,6 +75,9 @@ defmodule LiveViewStudio.Volunteers do
     %Volunteer{}
     |> Volunteer.changeset(attrs)
     |> Repo.insert()
+    # PubSub allows us to let other subscribers as well as the current
+    # liveview know about events, so it can replace send(self(), xxx)
+    |> broadcast(:volunteer_created)
   end
 
   @doc """
@@ -71,6 +96,7 @@ defmodule LiveViewStudio.Volunteers do
     volunteer
     |> Volunteer.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:volunteer_updated)
   end
 
   @doc """
@@ -86,7 +112,9 @@ defmodule LiveViewStudio.Volunteers do
 
   """
   def delete_volunteer(%Volunteer{} = volunteer) do
-    Repo.delete(volunteer)
+    volunteer
+    |> Repo.delete()
+    |> broadcast(:volunteer_deleted)
   end
 
   @doc """
