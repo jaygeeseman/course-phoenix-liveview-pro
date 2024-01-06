@@ -1,6 +1,11 @@
 defmodule LiveViewStudioWeb.TopSecretLive do
   use LiveViewStudioWeb, :live_view
 
+  # Ensure user is logged in and add current_user to socket.assigns (Usable as @current_user in templates)
+  # on_mount is called before mount()
+  # See example in LiveViewStudioWeb.UserAuth.on_mount
+  on_mount {LiveViewStudioWeb.UserAuth, :ensure_authenticated}
+
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
@@ -12,7 +17,7 @@ defmodule LiveViewStudioWeb.TopSecretLive do
       <div class="mission">
         <h1>Top Secret</h1>
         <h2>Your Mission</h2>
-        <h3>(spy number here)</h3>
+        <h3>00<%= @current_user.id %></h3>
         <p>
           Storm the castle and capture 3 bottles of Elixir.
         </p>

@@ -84,6 +84,12 @@ defmodule LiveViewStudioWeb.ServersLive do
           <div class="links">
             <!-- `.link navigate` meant for going to a different liveview -->
             <.link navigate={~p"/light"}>Adjust Lights</.link>
+            <!--
+              Add link to TopSecretLive to demonstrate that navigation through a live link
+              doesn't make an HTTP call, so `on_mount` is needed in TopSecretLive in addition
+              to
+            -->
+            <.link navigate={~p"/topsecret"}>Top Secret</.link>
           </div>
         </div>
       </div>
