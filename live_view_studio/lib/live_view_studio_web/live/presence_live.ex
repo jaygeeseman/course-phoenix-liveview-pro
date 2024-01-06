@@ -60,6 +60,18 @@ defmodule LiveViewStudioWeb.PresenceLive do
 
   def handle_event("toggle-playing", _, socket) do
     socket = update(socket, :is_playing, fn playing -> !playing end)
+
+    %{current_user: current_user} = socket.assigns
+    # `[meta | _]` pattern matches the first element in a list, so it can get
+    # only the first element of {%metas: [item1, item2, ...]}
+    # %{metas: [meta | _]} = Presence.get_by_key(@topic, current_user.id)
+
+    # ^ `hd` does the same thing and is easier to grok
+    meta = Presence.get_by_key(@topic, current_user.id).metas |> hd
+    new_meta = %{meta | is_playing: socket.assigns.is_playing}
+
+    Presence.update(self(), @topic, current_user.id, new_meta)
+
     {:noreply, socket}
   end
 
