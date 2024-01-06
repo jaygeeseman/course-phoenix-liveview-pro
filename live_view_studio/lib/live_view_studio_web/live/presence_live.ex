@@ -9,26 +9,14 @@ defmodule LiveViewStudioWeb.PresenceLive do
     %{current_user: current_user} = socket.assigns
 
     if connected?(socket) do
-      Phoenix.PubSub.subscribe(LiveViewStudio.PubSub, @topic)
-
-      {:ok, _} =
-        Presence.track(self(), @topic, current_user.id, %{
-          username: current_user.email |> String.split("@") |> hd(),
-          is_playing: false
-        })
+      Presence.subscribe(@topic)
+      Presence.track_user(current_user, @topic, %{is_playing: false})
     end
 
-    socket =
-      socket
-      |> assign(:is_playing, false)
-      |> assign(:presences, simple_presence_map(Presence.list(@topic)))
-
-    {:ok, socket}
-  end
-
-  def simple_presence_map(presences) do
-    presences
-    |> Enum.into(%{}, fn {user_id, user_data} -> {user_id, hd(user_data[:metas])} end)
+    {:ok,
+     socket
+     |> assign(:is_playing, false)
+     |> assign(:presences, Presence.list_users(@topic))}
   end
 
   def render(assigns) do
@@ -61,49 +49,14 @@ defmodule LiveViewStudioWeb.PresenceLive do
   def handle_event("toggle-playing", _, socket) do
     socket = update(socket, :is_playing, fn playing -> !playing end)
 
-    %{current_user: current_user} = socket.assigns
-    # `[meta | _]` pattern matches the first element in a list, so it can get
-    # only the first element of {%metas: [item1, item2, ...]}
-    # %{metas: [meta | _]} = Presence.get_by_key(@topic, current_user.id)
-
-    # ^ `hd` does the same thing and is easier to grok
-    meta = Presence.get_by_key(@topic, current_user.id).metas |> hd
-    new_meta = %{meta | is_playing: socket.assigns.is_playing}
-
-    Presence.update(self(), @topic, current_user.id, new_meta)
+    Presence.update_user(socket.assigns.current_user, @topic, %{
+      is_playing: socket.assigns.is_playing
+    })
 
     {:noreply, socket}
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
-    socket =
-      socket
-      |> remove_presences(diff.leaves)
-      |> add_presences(diff.joins)
-
-    # Simpler to code, but likely less efficient
-    # |> assign(:presences, simple_presence_map(Presence.list(@topic)))
-
-    {:noreply, socket}
-  end
-
-  defp add_presences(socket, joins) do
-    socket
-    |> assign(
-      :presences,
-      socket.assigns.presences
-      |> Map.merge(joins |> simple_presence_map)
-    )
-  end
-
-  defp remove_presences(socket, leaves) do
-    socket
-    |> assign(
-      :presences,
-      socket.assigns.presences
-      # |> Map.reject(fn {k, _} -> Map.has_key?(leaves, k) end)
-      # This may perform better with a large presence list
-      |> Map.drop(leaves |> Enum.map(fn {user_id, _} -> user_id end))
-    )
+    {:noreply, Presence.handle_diff(socket, diff)}
   end
 end
