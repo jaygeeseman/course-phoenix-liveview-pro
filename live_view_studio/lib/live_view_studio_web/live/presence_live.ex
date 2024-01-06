@@ -15,8 +15,10 @@ defmodule LiveViewStudioWeb.PresenceLive do
 
     {:ok,
      socket
-     |> assign(:is_playing, false)
-     |> assign(:presences, Presence.list_users(@topic))}
+     |> assign(
+       is_playing: false,
+       presences: Presence.list_users(@topic)
+     )}
   end
 
   def render(assigns) do
