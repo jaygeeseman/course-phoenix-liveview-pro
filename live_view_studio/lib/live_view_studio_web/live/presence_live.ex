@@ -9,6 +9,8 @@ defmodule LiveViewStudioWeb.PresenceLive do
     %{current_user: current_user} = socket.assigns
 
     if connected?(socket) do
+      Phoenix.PubSub.subscribe(LiveViewStudio.PubSub, @topic)
+
       {:ok, _} =
         Presence.track(self(), @topic, current_user.id, %{
           username: current_user.email |> String.split("@") |> hd(),
@@ -31,7 +33,6 @@ defmodule LiveViewStudioWeb.PresenceLive do
 
   def render(assigns) do
     ~H"""
-    <pre><%#= inspect(@presences, pretty: true) %></pre>
     <div id="presence">
       <div class="users">
         <h2>Who's Here?</h2>
@@ -60,5 +61,37 @@ defmodule LiveViewStudioWeb.PresenceLive do
   def handle_event("toggle-playing", _, socket) do
     socket = update(socket, :is_playing, fn playing -> !playing end)
     {:noreply, socket}
+  end
+
+  def handle_info(%{event: "presence_diff", payload: diff}, socket) do
+    socket =
+      socket
+      |> remove_presences(diff.leaves)
+      |> add_presences(diff.joins)
+
+    # Simpler to code, but likely less efficient
+    # |> assign(:presences, simple_presence_map(Presence.list(@topic)))
+
+    {:noreply, socket}
+  end
+
+  defp add_presences(socket, joins) do
+    socket
+    |> assign(
+      :presences,
+      socket.assigns.presences
+      |> Map.merge(joins |> simple_presence_map)
+    )
+  end
+
+  defp remove_presences(socket, leaves) do
+    socket
+    |> assign(
+      :presences,
+      socket.assigns.presences
+      # |> Map.reject(fn {k, _} -> Map.has_key?(leaves, k) end)
+      # This may perform better with a large presence list
+      |> Map.drop(leaves |> Enum.map(fn {user_id, _} -> user_id end))
+    )
   end
 end
