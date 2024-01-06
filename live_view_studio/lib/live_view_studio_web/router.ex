@@ -17,6 +17,13 @@ defmodule LiveViewStudioWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Because of the on_mount call in TopSecretLive, I'm not completely
+  # sure :require_authenticated_user is needed here. I tested without
+  # and it still works as expected, so this seems redundant.
+  # Having said that, it's nice to see the requirement in the routes.
+  # There are more upcoming sections around auth, so there is most
+  # likely something coming later to explain this, but I'm leaving
+  # this note for myself just in case.
   scope "/", LiveViewStudioWeb do
     pipe_through [:browser, :require_authenticated_user]
 
