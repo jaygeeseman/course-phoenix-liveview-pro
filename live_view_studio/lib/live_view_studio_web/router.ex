@@ -24,11 +24,24 @@ defmodule LiveViewStudioWeb.Router do
   # There are more upcoming sections around auth, so there is most
   # likely something coming later to explain this, but I'm leaving
   # this note for myself just in case.
+  # Update from lesson 21-live-sessions: both ended up here (using
+  # `pipe_through` and `live_session ... on_mount` instead of having
+  # one here and one in the view.
   scope "/", LiveViewStudioWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/bingo", BingoLive
-    live "/topsecret", TopSecretLive
+    # `live_session`s are a way to define groups of routes with the same
+    # requirements (authentication, etc). Navigation between liveviews in
+    # the same live_session purely happen over the existing websocket
+    # connection. Navigating between liveviews in different live_sessions
+    # forces a full page reload and establishes a new websocket connection,
+    # which means all the plugs in the http pipeline are run.
+    live_session :authenticated,
+      on_mount: {LiveViewStudioWeb.UserAuth, :ensure_authenticated} do
+      live "/bingo", BingoLive
+      live "/presence", PresenceLive
+      live "/topsecret", TopSecretLive
+    end
   end
 
   scope "/", LiveViewStudioWeb do
@@ -45,7 +58,6 @@ defmodule LiveViewStudioWeb.Router do
     live "/servers/:id", ServersLive
     live "/donations", DonationsLive
     live "/volunteers", VolunteersLive
-    live "/presence", PresenceLive
     live "/bookings", BookingsLive
     live "/shop", ShopLive
     live "/juggling", JugglingLive
