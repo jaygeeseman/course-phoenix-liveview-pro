@@ -18,8 +18,9 @@ defmodule LiveViewStudioWeb.ShopLive do
     {:noreply, assign(socket, :cart, cart)}
   end
 
-  def toggle_cart() do
-    JS.toggle(
+  def toggle_cart(js \\ %JS{}) do
+    js
+    |> JS.toggle(
       to: "#cart",
       in: {
         "ease-in-out duration-300",
@@ -40,7 +41,7 @@ defmodule LiveViewStudioWeb.ShopLive do
     )
   end
 
-  def shake_cart(transition \\ %JS{}) do
-    transition |> JS.transition("shake", to: "#cart-button", time: 500)
+  def shake_cart(js \\ %JS{}) do
+    js |> JS.transition("shake", to: "#cart-button", time: 500)
   end
 end
