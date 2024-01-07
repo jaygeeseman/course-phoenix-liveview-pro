@@ -1,7 +1,6 @@
 import flatpickr from "../vendor/flatpickr"
 
-let Hooks = {}
-Hooks.Calendar = {
+let Calendar = {
   mounted() {
     this.pickr = flatpickr(this.el, {
       inline: true,
@@ -39,4 +38,4 @@ Hooks.Calendar = {
   }
 }
 
-export default Hooks;
+export default Calendar;
