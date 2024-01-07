@@ -44,4 +44,9 @@ defmodule LiveViewStudioWeb.ShopLive do
   def shake_cart(js \\ %JS{}) do
     js |> JS.transition("shake", to: "#cart-button", time: 500)
   end
+
+  def add_product(product) do
+    JS.push("add-product", value: %{product: product.image})
+    |> shake_cart()
+  end
 end

@@ -22,10 +22,7 @@
       <div class="name">
         <%= product.name %>
       </div>
-      <button phx-click={
-        JS.push("add-product", value: %{product: product.image})
-        |> shake_cart()
-      }>
+      <button phx-click={add_product(product)}>
         Add
       </button>
     </div>
