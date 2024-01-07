@@ -9,7 +9,7 @@ defmodule LiveViewStudioWeb.LightLive do
   def render(assigns) do
     ~H"""
     <h1>Front Porch Light</h1>
-    <div id="light">
+    <div id="light" phx-window-keyup="keyup">
       <div class="meter">
         <span style={"width: #{@brightness}%; background-color: #{temp_color(@temp)}"}>
           <%= @brightness %>%
@@ -19,15 +19,27 @@ defmodule LiveViewStudioWeb.LightLive do
         <div class="temps">
           <%= for temp <- ["3000", "4000", "5000"] do %>
             <div>
-              <input type="radio" id={temp} name="temp" value={temp} checked={temp == @temp} />
+              <input
+                type="radio"
+                id={temp}
+                name="temp"
+                value={temp}
+                checked={temp == @temp}
+              />
               <label for={temp}><%= temp %></label>
             </div>
           <% end %>
         </div>
       </form>
       <form phx-change="set-brightness">
-        <input type="range" min="0" max="100"
-              name="brightness" value={@brightness} phx-debounce="200" />
+        <input
+          type="range"
+          min="0"
+          max="100"
+          name="brightness"
+          value={@brightness}
+          phx-debounce="200"
+        />
       </form>
       <button phx-click="off">
         <img src="/images/light-off.svg" />
@@ -54,31 +66,11 @@ defmodule LiveViewStudioWeb.LightLive do
   end
 
   def handle_event("up", _, socket) do
-    # More concise, but maybe harder to grok
-    # socket = update(socket, :brightness, &min(&1 + 10, 100))
-    socket =
-      update(socket, :brightness, fn brightness ->
-        # Increase by 10
-        (brightness + 10)
-        # but don't exceed 100
-        |> min(100)
-      end)
-
-    {:noreply, socket}
+    {:noreply, brightness_up(socket)}
   end
 
   def handle_event("down", _, socket) do
-    # More concise, but maybe harder to grok
-    # socket = update(socket, :brightness, &max(&1 - 10, 0))
-    socket =
-      update(socket, :brightness, fn brightness ->
-        # Decrease by 10
-        (brightness - 10)
-        # but don't go below 0
-        |> max(0)
-      end)
-
-    {:noreply, socket}
+    {:noreply, brightness_down(socket)}
   end
 
   def handle_event("off", _, socket) do
@@ -101,7 +93,43 @@ defmodule LiveViewStudioWeb.LightLive do
     {:noreply, socket}
   end
 
+  def handle_event("keyup", %{"key" => "ArrowUp"}, socket) do
+    {:noreply, brightness_up(socket)}
+  end
+
+  def handle_event("keyup", %{"key" => "ArrowDown"}, socket) do
+    {:noreply, brightness_down(socket)}
+  end
+
+  def handle_event("keyup", _, socket) do
+    {:noreply, socket}
+  end
+
   defp temp_color("3000"), do: "#F1C40D"
   defp temp_color("4000"), do: "#FEFF66"
   defp temp_color("5000"), do: "#99CCFF"
+
+  defp brightness_down(socket) do
+    # More concise, but maybe harder to grok
+    # update(socket, :brightness, &max(&1 - 10, 0))
+    socket
+    |> Phoenix.Component.update(:brightness, fn brightness ->
+      # Decrease by 10
+      (brightness - 10)
+      # but don't go below 0
+      |> max(0)
+    end)
+  end
+
+  defp brightness_up(socket) do
+    # More concise, but maybe harder to grok
+    # update(socket, :brightness, &min(&1 + 10, 100))
+    socket
+    |> Phoenix.Component.update(:brightness, fn brightness ->
+      # Increase by 10
+      (brightness + 10)
+      # but don't exceed 100
+      |> min(100)
+    end)
+  end
 end
