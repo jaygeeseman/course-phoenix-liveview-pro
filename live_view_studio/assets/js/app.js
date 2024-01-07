@@ -37,6 +37,10 @@ Hooks.Calendar = {
         this.pushEvent("dates-picked", selectedDates);
       }
     });
+
+    this.handleEvent("add-unavailable-dates", (dates) => {
+      this.pickr.set("disable", [dates, ...this.pickr.config.disable])
+    })
   },
 
   destroyed() {
