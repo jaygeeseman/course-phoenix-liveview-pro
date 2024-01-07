@@ -24,8 +24,10 @@ import topbar from "../vendor/topbar"
 
 // Setup LiveView hooks
 import Calendar from "./date-picker"
+import Phone from "./phone-formatter"
 let Hooks = {
-  Calendar: Calendar
+  Calendar: Calendar,
+  Phone: Phone
 }
 
 let csrfToken =
