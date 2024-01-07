@@ -24,9 +24,11 @@ import topbar from "../vendor/topbar"
 
 // Setup LiveView hooks
 import Calendar from "./date-picker"
+import Clipboard from "./clipboard"
 import Phone from "./phone-formatter"
 let Hooks = {
   Calendar: Calendar,
+  Clipboard: Clipboard,
   Phone: Phone
 }
 
