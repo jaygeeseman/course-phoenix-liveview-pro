@@ -22,11 +22,22 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+// Setup LiveView hooks
+import Calendar from "./date-picker"
+import Clipboard from "./clipboard"
+import Phone from "./phone-formatter"
+let Hooks = {
+  Calendar: Calendar,
+  Clipboard: Clipboard,
+  Phone: Phone
+}
+
 let csrfToken =
   document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 let liveSocket = new LiveSocket("/live", Socket, {
-  params: { _csrf_token: csrfToken }
+  params: { _csrf_token: csrfToken },
+  hooks: Hooks
 });
 
 // Show progress bar on live navigation and form submits

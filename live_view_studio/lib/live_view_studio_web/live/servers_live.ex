@@ -162,6 +162,13 @@ defmodule LiveViewStudioWeb.ServersLive do
         >
           <%= @server.status %>
         </button>
+        <.link
+          id="#{@server.id}-clipboard"
+          data-content={url(~p"/servers/#{@server}")}
+          phx-hook="Clipboard"
+        >
+          <.icon name="hero-clipboard-document" />
+        </.link>
       </div>
       <div class="body">
         <div class="row">
