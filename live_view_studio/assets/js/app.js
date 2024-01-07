@@ -30,7 +30,8 @@ Hooks.Calendar = {
     this.pickr = flatpickr(this.el, {
       inline: true,
       mode: "range",
-      showMonths: 2
+      showMonths: 2,
+      disable: JSON.parse(this.el.dataset.unavailableDates)
     });
   },
 
