@@ -59,16 +59,13 @@ defmodule LiveViewStudioWeb.VolunteersLive do
         <%= @volunteer.phone %>
       </div>
       <div class="status">
-        <button phx-click="toggle-checked-out" phx-value-id={@volunteer.id}>
-          <%= if @volunteer.checked_out,
-            do: "Check In",
-            else: "Check Out" %>
+        <button phx-click={toggle_checked_out(@id, @volunteer)}>
+          <%= if @volunteer.checked_out, do: "Check In", else: "Check Out" %>
         </button>
       </div>
       <.link
         class="delete"
-        phx-click="delete"
-        phx-value-id={@volunteer.id}
+        phx-click={delete(@id, @volunteer)}
         data-confirm="Are you sure?"
       >
         <.icon name="hero-trash-solid" />
@@ -111,5 +108,19 @@ defmodule LiveViewStudioWeb.VolunteersLive do
      socket
      |> update(:count, &(&1 - 1))
      |> stream_delete(:volunteers, volunteer)}
+  end
+
+  def toggle_checked_out(volunteer_id, volunteer) do
+    JS.push("toggle-checked-out", value: %{id: volunteer.id})
+    |> JS.transition("shake", to: "##{volunteer_id}", time: 500)
+  end
+
+  def delete(volunteer_id, volunteer) do
+    JS.push("delete", value: %{id: volunteer.id})
+    |> JS.hide(
+      to: "##{volunteer_id}",
+      transition: "ease duration-1000 scale-150 opacity-0",
+      time: 1000
+    )
   end
 end
