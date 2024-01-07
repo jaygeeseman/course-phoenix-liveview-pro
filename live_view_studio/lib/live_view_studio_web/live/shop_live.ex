@@ -2,6 +2,7 @@ defmodule LiveViewStudioWeb.ShopLive do
   use LiveViewStudioWeb, :live_view
 
   alias LiveViewStudio.Products
+  alias Phoenix.LiveView.JS
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -10,11 +11,6 @@ defmodule LiveViewStudioWeb.ShopLive do
        cart: %{},
        show_cart: false
      )}
-  end
-
-  def handle_event("toggle-show-cart", _, socket) do
-    socket = update(socket, :show_cart, fn show -> !show end)
-    {:noreply, socket}
   end
 
   def handle_event("add-product", %{"product" => product}, socket) do
