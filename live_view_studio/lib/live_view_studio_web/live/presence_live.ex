@@ -28,7 +28,7 @@ defmodule LiveViewStudioWeb.PresenceLive do
       <div class="users">
         <h2>
           Who's Here?
-          <button phx-click={JS.toggle(to: "#presences")}>
+          <button phx-click={toggle_presences()}>
             <.icon name="hero-list-bullet-solid" />
           </button>
         </h2>
@@ -66,5 +66,12 @@ defmodule LiveViewStudioWeb.PresenceLive do
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
     {:noreply, Presence.handle_diff(socket, diff)}
+  end
+
+  def toggle_presences(js \\ %JS{}) do
+    js
+    |> JS.toggle(to: "#presences")
+    |> JS.add_class("bg-slate-400", to: ".hero-list-bullet-solid:not(.bg-slate-400)")
+    |> JS.remove_class("bg-slate-400", to: ".hero-list-bullet-solid.bg-slate-400")
   end
 end
