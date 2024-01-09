@@ -35,6 +35,20 @@ defmodule LiveViewStudioWeb.DonationsLive do
     {:noreply, socket}
   end
 
+  def handle_event("keydown", %{"key" => "ArrowLeft"}, socket) do
+    {:noreply,
+     socket
+     |> goto_page(previous_page(socket))}
+  end
+
+  def handle_event("keydown", %{"key" => "ArrowRight"}, socket) do
+    {:noreply,
+     socket
+     |> goto_page(next_page(socket))}
+  end
+
+  def handle_event("keydown", _, socket), do: {:noreply, socket}
+
   attr :sort_by, :atom, required: true
   attr :options, :map, required: true
   slot :inner_block, required: true
@@ -97,5 +111,24 @@ defmodule LiveViewStudioWeb.DonationsLive do
       {number, _} -> number
       :error -> default
     end
+  end
+
+  defp previous_page(socket) do
+    %{options: options} = socket.assigns
+    if options.page > 1, do: options.page - 1, else: options.page
+  end
+
+  defp next_page(socket) do
+    %{donation_count: donation_count, options: options} = socket.assigns
+
+    if options.page * options.per_page < donation_count do
+      options.page + 1
+    else
+      options.page
+    end
+  end
+
+  defp goto_page(socket, page) do
+    socket |> push_patch(to: ~p"/donations?#{%{socket.assigns.options | page: page}}")
   end
 end
