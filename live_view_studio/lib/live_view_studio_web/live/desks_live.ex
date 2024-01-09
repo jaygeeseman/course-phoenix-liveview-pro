@@ -7,12 +7,15 @@ defmodule LiveViewStudioWeb.DesksLive do
   def mount(_params, _session, socket) do
     if connected?(socket), do: Desks.subscribe()
 
-    socket =
-      assign(socket,
-        form: to_form(Desks.change_desk(%Desk{}))
-      )
-
-    {:ok, stream(socket, :desks, Desks.list_desks())}
+    {:ok,
+     socket
+     |> assign(form: to_form(Desks.change_desk(%Desk{})))
+     |> allow_upload(:photos,
+       accept: ~w(.png .jpeg .jpg),
+       max_entries: 3,
+       max_file_size: 10_000_000
+     )
+     |> stream(:desks, Desks.list_desks())}
   end
 
   def handle_event("validate", %{"desk" => params}, socket) do
@@ -33,6 +36,12 @@ defmodule LiveViewStudioWeb.DesksLive do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
+  end
+
+  def handle_event("cancel", %{"ref" => ref}, socket) do
+    {:noreply,
+     socket
+     |> cancel_upload(:photos, ref)}
   end
 
   def handle_info({:desk_created, desk}, socket) do
